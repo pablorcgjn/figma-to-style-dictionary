@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Figma JSON to Style Dictionary - Transformador de Design Tokens</title>
+    <meta name="description" content="Convierte tus design tokens de Figma a formato Style Dictionary con soporte para múltiples plataformas">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">Figma JSON to Style Dictionary</h1>
+                <p class="subtitle">Convierte tus design tokens en formatos específicos para cada plataforma</p>
+            </div>
+        </header>
+
+        <main class="main">
+            <!-- Upload Section -->
+            <section class="upload-section card">
+                <div class="upload-area" id="uploadArea">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <h2 class="upload-title">Sube tu archivo JSON de Figma</h2>
+                    <p class="upload-description">Arrastra y suelta o haz clic para seleccionar</p>
+                    <input type="file" id="fileInput" accept=".json" hidden>
+                    <button class="btn btn-primary" id="uploadBtn">Seleccionar archivo</button>
+                </div>
+                
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <div class="file-details">
+                        <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <div class="file-text">
+                            <span class="file-name" id="fileName"></span>
+                            <span class="file-size" id="fileSize"></span>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary btn-small" id="changeFileBtn">Cambiar archivo</button>
+                </div>
+            </section>
+
+            <!-- Options Section -->
+            <section class="options-section card" id="optionsSection" style="display: none;">
+                <h2 class="section-title">Opciones de conversión</h2>
+                
+                <!-- Output Formats -->
+                <div class="option-group">
+                    <h3 class="option-title">Formatos de salida</h3>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="css" checked>
+                            <span class="checkbox-text">CSS Variables</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="scss">
+                            <span class="checkbox-text">SCSS Variables</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="less">
+                            <span class="checkbox-text">LESS Variables</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="json">
+                            <span class="checkbox-text">JSON</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="js">
+                            <span class="checkbox-text">JavaScript (ES6)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="ios">
+                            <span class="checkbox-text">iOS (Swift)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="android">
+                            <span class="checkbox-text">Android (XML)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="flutter">
+                            <span class="checkbox-text">Flutter (Dart)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Token Types -->
+                <div class="option-group">
+                    <h3 class="option-title">Tipos de tokens</h3>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="token-type" value="color" checked>
+                            <span class="checkbox-text">Colores</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="token-type" value="typography" checked>
+                            <span class="checkbox-text">Tipografía</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="token-type" value="spacing" checked>
+                            <span class="checkbox-text">Espaciado</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="token-type" value="border" checked>
+                            <span class="checkbox-text">Bordes</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="token-type" value="shadow" checked>
+                            <span class="checkbox-text">Sombras</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="token-type" value="size" checked>
+                            <span class="checkbox-text">Tamaños</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Additional Options -->
+                <div class="option-group">
+                    <h3 class="option-title">Opciones adicionales</h3>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="includePrefix" checked>
+                            <span class="checkbox-text">Incluir prefijos</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="includeComments">
+                            <span class="checkbox-text">Incluir comentarios</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="prettifyOutput" checked>
+                            <span class="checkbox-text">Formatear salida</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="groupByCategory" checked>
+                            <span class="checkbox-text">Agrupar por categoría</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <label class="input-label">
+                        Prefijo personalizado
+                        <input type="text" id="customPrefix" class="text-input" placeholder="ej: ds, design" value="sds">
+                    </label>
+                </div>
+
+                <button class="btn btn-primary btn-large" id="convertBtn">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Convertir JSON
+                </button>
+            </section>
+
+            <!-- Preview Section -->
+            <section class="preview-section card" id="previewSection" style="display: none;">
+                <div class="section-header">
+                    <h2 class="section-title">Vista previa</h2>
+                    <div class="preview-tabs" id="previewTabs"></div>
+                </div>
+                
+                <div class="preview-content">
+                    <div class="preview-stats" id="previewStats"></div>
+                    <div class="code-preview" id="codePreview">
+                        <pre><code id="previewCode"></code></pre>
+                    </div>
+                </div>
+
+                <div class="preview-actions">
+                    <button class="btn btn-secondary" id="copyBtn">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Copiar código
+                    </button>
+                    <button class="btn btn-primary" id="downloadBtn">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Descargar todos los formatos
+                    </button>
+                </div>
+            </section>
+
+            <!-- Token Preview Section -->
+            <section class="tokens-preview-section card" id="tokensPreviewSection" style="display: none;">
+                <h2 class="section-title">Tokens detectados</h2>
+                <div id="tokensGrid" class="tokens-grid"></div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>Creado con ❤️ para diseñadores y desarrolladores</p>
+        </footer>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="converter.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

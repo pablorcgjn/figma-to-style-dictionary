@@ -1,0 +1,30 @@
+{
+    "name": "figma-to-style-dictionary",
+    "version": "1.0.0",
+    "description": "Herramienta web para transformar tokens de diseño de Figma en formatos específicos para cada plataforma",
+    "main": "index.html",
+    "scripts": {
+        "start": "open index.html"
+    },
+    "keywords": [
+        "figma",
+        "design-tokens",
+        "style-dictionary",
+        "design-system",
+        "css-variables",
+        "scss",
+        "ios",
+        "android",
+        "flutter"
+    ],
+    "author": "Pablo Guerra",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/TU_USUARIO/figma-to-style-dictionary.git"
+    },
+    "bugs": {
+        "url": "https://github.com/TU_USUARIO/figma-to-style-dictionary/issues"
+    },
+    "homepage": "https://github.com/TU_USUARIO/figma-to-style-dictionary#readme"
+}
