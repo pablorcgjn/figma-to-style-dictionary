@@ -1,0 +1,52 @@
+name: Build Design Tokens
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'source-tokens/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'source-tokens/**'
+  workflow_dispatch:
+
+jobs:
+  build-tokens:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🎨 Build design tokens
+        run: npm run build
+
+      - name: 📊 Show generated files
+        run: |
+          echo "Generated files:"
+          ls -lah dist/
+
+      - name: 💾 Commit generated files
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add dist/
+          git diff --staged --quiet || git commit -m "chore: Update generated design tokens [skip ci]"
+
+      - name: 🚀 Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}

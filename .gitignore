@@ -17,6 +17,10 @@ npm-debug.log*
 *.tmp
 .cache/
 
+# Node
+node_modules/
+package-lock.json
+
 # User uploads (optional - uncomment if you don't want to track user files)
 # uploads/
 # downloads/

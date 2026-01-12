@@ -3,8 +3,11 @@
     "version": "1.0.0",
     "description": "Herramienta web para transformar tokens de diseño de Figma en formatos específicos para cada plataforma",
     "main": "index.html",
+    "type": "module",
     "scripts": {
-        "start": "open index.html"
+        "start": "open index.html",
+        "build": "node build-tokens.js",
+        "build:watch": "nodemon --watch source-tokens --exec npm run build"
     },
     "keywords": [
         "figma",
@@ -21,10 +24,13 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/TU_USUARIO/figma-to-style-dictionary.git"
+        "url": "git+https://github.com/TU_USUARIO/figma-to-style-dictionary.git"
     },
     "bugs": {
         "url": "https://github.com/TU_USUARIO/figma-to-style-dictionary/issues"
     },
-    "homepage": "https://github.com/TU_USUARIO/figma-to-style-dictionary#readme"
+    "homepage": "https://github.com/TU_USUARIO/figma-to-style-dictionary#readme",
+    "devDependencies": {
+        "style-dictionary": "^5.1.3"
+    }
 }
