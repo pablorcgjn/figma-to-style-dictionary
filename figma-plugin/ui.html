@@ -371,9 +371,15 @@
                 const content = btoa(JSON.stringify(extractedTokens, null, 2));
                 const message = `chore(tokens): Update design tokens - ${new Date().toISOString().split('T')[0]}`;
 
+                console.log('📤 Preparando subida a GitHub...');
+                console.log(`   Repo: ${owner}/${repo}`);
+                console.log(`   Rama: ${branch}`);
+                console.log(`   Archivo: ${filePath}`);
+
                 // Obtener SHA del archivo si existe
                 let sha = null;
                 try {
+                    console.log('🔍 Verificando si el archivo ya existe...');
                     const getResponse = await fetch(
                         `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
                         {
@@ -386,12 +392,16 @@
                     if (getResponse.ok) {
                         const data = await getResponse.json();
                         sha = data.sha;
+                        console.log('✓ Archivo existe, se actualizará');
+                    } else {
+                        console.log('✓ Archivo no existe, se creará nuevo');
                     }
                 } catch (e) {
-                    // Archivo no existe, está bien
+                    console.log('✓ Archivo no existe (404 es normal), se creará nuevo');
                 }
 
                 // Crear o actualizar archivo
+                console.log('📝 Creando/actualizando archivo en GitHub...');
                 const response = await fetch(
                     `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
                     {
@@ -412,10 +422,12 @@
 
                 if (!response.ok) {
                     const error = await response.json();
+                    console.error('❌ Error de GitHub API:', error);
                     throw new Error(error.message || 'Error al subir a GitHub');
                 }
 
                 const result = await response.json();
+                console.log('✅ Archivo subido exitosamente:', result.content.html_url);
                 showStatus('✅ Tokens subidos exitosamente a GitHub!', 'success');
 
                 parent.postMessage({
@@ -432,6 +444,7 @@
                 }
 
             } catch (error) {
+                console.error('❌ Error completo:', error);
                 showStatus(`❌ Error: ${error.message}`, 'error');
                 parent.postMessage({
                     pluginMessage: {
