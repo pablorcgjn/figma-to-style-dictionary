@@ -352,15 +352,22 @@
 
         // Subir a GitHub
         document.getElementById('uploadBtn').onclick = async () => {
-            const token = document.getElementById('githubToken').value;
-            const owner = document.getElementById('repoOwner').value;
-            const repo = document.getElementById('repoName').value;
-            const branch = document.getElementById('branch').value;
-            const filePath = document.getElementById('filePath').value;
+            const token = document.getElementById('githubToken').value.trim(); // Limpiar espacios
+            const owner = document.getElementById('repoOwner').value.trim();
+            const repo = document.getElementById('repoName').value.trim();
+            const branch = document.getElementById('branch').value.trim();
+            const filePath = document.getElementById('filePath').value.trim();
             const createPR = document.getElementById('createPR').checked;
 
             if (!token || !owner || !repo) {
                 showStatus('❌ Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            // Validar que el token solo tenga caracteres ASCII válidos
+            if (!/^[a-zA-Z0-9_]+$/.test(token)) {
+                showStatus('❌ El token contiene caracteres inválidos. Debe ser solo letras, números y guiones bajos.', 'error');
+                console.error('Token inválido. Asegúrate de copiar solo el token sin espacios ni caracteres especiales.');
                 return;
             }
 
@@ -375,6 +382,7 @@
                 console.log(`   Repo: ${owner}/${repo}`);
                 console.log(`   Rama: ${branch}`);
                 console.log(`   Archivo: ${filePath}`);
+                console.log(`   Token length: ${token.length} caracteres`);
 
                 // Obtener SHA del archivo si existe
                 let sha = null;
@@ -384,7 +392,7 @@
                         `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
                         {
                             headers: {
-                                'Authorization': `token ${token}`,
+                                'Authorization': `Bearer ${token}`,
                                 'Accept': 'application/vnd.github.v3+json'
                             }
                         }
@@ -407,7 +415,7 @@
                     {
                         method: 'PUT',
                         headers: {
-                            'Authorization': `token ${token}`,
+                            'Authorization': `Bearer ${token}`,
                             'Accept': 'application/vnd.github.v3+json',
                             'Content-Type': 'application/json'
                         },
