@@ -4,6 +4,7 @@
 
 ## ✨ Características
 
+### 🌐 Aplicación Web
 - **Múltiples formatos de salida**: CSS Variables, SCSS, LESS, JSON, JavaScript, iOS (Swift), Android (XML), Flutter (Dart)
 - **Tipos de tokens soportados**: Colores, Tipografía, Espaciado, Bordes, Sombras, Tamaños
 - **Preview en tiempo real**: Visualiza los tokens antes de descargar
@@ -11,6 +12,14 @@
 - **Interfaz moderna**: Diseño premium con animaciones y gradientes
 - **Drag & Drop**: Arrastra y suelta archivos JSON
 - **Descarga múltiple**: Descarga todos los formatos a la vez
+
+### 🔌 Plugin de Figma (NUEVO)
+- **Exportación automática**: Extrae variables directamente desde Figma
+- **Sincronización con GitHub**: Sube tokens automáticamente a tu repositorio
+- **Sin exportación manual**: Workflow completamente automatizado
+- **Configuración persistente**: Guarda tu configuración de GitHub
+- **Pull Requests automáticos**: Opción para crear PRs
+- **Ver [documentación del plugin](figma-plugin/README.md)**
 
 ## 🚀 Uso
 
