@@ -218,15 +218,29 @@ figma.ui.onmessage = async (msg) => {
         }
     }
 
-    if (msg.type === 'upload-to-github') {
+    if (msg.type === 'save-config') {
         try {
-            figma.notify('Subiendo a GitHub...', { timeout: 2000 });
-
-            // La UI se encargará de la llamada a GitHub API
-            // ya que Figma plugins no pueden hacer llamadas HTTP directamente
-
+            // Guardar configuración usando clientStorage de Figma
+            await figma.clientStorage.setAsync('github-config', msg.config);
+            console.log('✅ Configuración guardada');
         } catch (error) {
-            figma.notify('❌ Error: ' + error.message, { timeout: 5000 });
+            console.error('❌ Error guardando configuración:', error);
+        }
+    }
+
+    if (msg.type === 'load-config') {
+        try {
+            // Cargar configuración desde clientStorage
+            const config = await figma.clientStorage.getAsync('github-config');
+            if (config) {
+                figma.ui.postMessage({
+                    type: 'config-loaded',
+                    config: config
+                });
+                console.log('✅ Configuración cargada');
+            }
+        } catch (error) {
+            console.error('❌ Error cargando configuración:', error);
         }
     }
 

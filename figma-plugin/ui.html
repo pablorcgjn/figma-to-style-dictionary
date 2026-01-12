@@ -308,24 +308,16 @@
     <script>
         // Estado global
         let extractedTokens = null;
-        let config = loadConfig();
+        let config = {};
 
-        // Cargar configuración guardada
+        // Cargar configuración guardada (usando clientStorage de Figma)
         function loadConfig() {
-            const saved = localStorage.getItem('figma-github-config');
-            if (saved) {
-                const config = JSON.parse(saved);
-                document.getElementById('githubToken').value = config.token || '';
-                document.getElementById('repoOwner').value = config.owner || 'pablorcgjn';
-                document.getElementById('repoName').value = config.repo || 'figma-to-style-dictionary';
-                document.getElementById('branch').value = config.branch || 'main';
-                document.getElementById('filePath').value = config.filePath || 'source-tokens/tokens.json';
-                return config;
-            }
+            // Pedir configuración guardada al plugin
+            parent.postMessage({ pluginMessage: { type: 'load-config' } }, '*');
             return {};
         }
 
-        // Guardar configuración
+        // Guardar configuración (usando clientStorage de Figma)
         function saveConfig() {
             if (document.getElementById('saveConfig').checked) {
                 const config = {
@@ -335,7 +327,13 @@
                     branch: document.getElementById('branch').value,
                     filePath: document.getElementById('filePath').value
                 };
-                localStorage.setItem('figma-github-config', JSON.stringify(config));
+                // Enviar al plugin para guardar
+                parent.postMessage({
+                    pluginMessage: {
+                        type: 'save-config',
+                        config: config
+                    }
+                }, '*');
             }
         }
 
@@ -494,6 +492,17 @@
 
                 showStatus(`✅ ${tokenCount} tokens extraídos correctamente`, 'success');
                 updateTargetPath();
+            }
+
+            if (msg.type === 'config-loaded') {
+                // Cargar configuración en los campos
+                const config = msg.config;
+                if (config.token) document.getElementById('githubToken').value = config.token;
+                if (config.owner) document.getElementById('repoOwner').value = config.owner;
+                if (config.repo) document.getElementById('repoName').value = config.repo;
+                if (config.branch) document.getElementById('branch').value = config.branch;
+                if (config.filePath) document.getElementById('filePath').value = config.filePath;
+                console.log('✅ Configuración aplicada a los campos');
             }
 
             if (msg.type === 'error') {
