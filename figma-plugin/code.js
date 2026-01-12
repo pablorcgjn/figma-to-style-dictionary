@@ -6,56 +6,105 @@ figma.showUI(__html__, { width: 400, height: 600 });
 
 // Función para extraer todas las variables locales
 async function extractLocalVariables() {
-    const collections = await figma.variables.getLocalVariableCollectionsAsync();
-    const tokens = {};
+    try {
+        console.log('🔍 Iniciando extracción de variables...');
 
-    for (const collection of collections) {
-        const variables = await Promise.all(
-            collection.variableIds.map(id => figma.variables.getVariableByIdAsync(id))
-        );
+        // Obtener todas las colecciones de variables
+        const collections = await figma.variables.getLocalVariableCollectionsAsync();
+        console.log(`📚 Colecciones encontradas: ${collections.length}`);
 
-        const modes = collection.modes;
+        if (collections.length === 0) {
+            throw new Error('No se encontraron colecciones de variables en este archivo');
+        }
 
-        for (const mode of modes) {
-            const modeName = mode.name;
-            tokens[modeName] = tokens[modeName] || {};
+        const tokens = {};
+        let totalVariables = 0;
 
-            for (const variable of variables) {
-                if (!variable) continue;
+        for (const collection of collections) {
+            console.log(`📁 Procesando colección: ${collection.name}`);
+            console.log(`   Variables en colección: ${collection.variableIds.length}`);
 
-                const value = variable.valuesByMode[mode.modeId];
-                const tokenPath = variable.name.split('/').join('.');
+            // Obtener todas las variables de esta colección
+            const variables = [];
+            for (const varId of collection.variableIds) {
+                const variable = await figma.variables.getVariableByIdAsync(varId);
+                if (variable) {
+                    variables.push(variable);
+                }
+            }
 
-                // Crear estructura de token
-                const token = {
-                    $type: getTokenType(variable.resolvedType),
-                    $value: await resolveValue(value, variable.resolvedType),
-                    $extensions: {
-                        'com.figma.variableId': variable.id,
-                        'com.figma.scopes': variable.scopes,
-                        'com.figma.codeSyntax': variable.codeSyntax
-                    }
-                };
+            console.log(`   Variables cargadas: ${variables.length}`);
 
-                // Añadir información de alias si existe
-                if (typeof value === 'object' && value.type === 'VARIABLE_ALIAS') {
-                    const aliasVariable = await figma.variables.getVariableByIdAsync(value.id);
-                    if (aliasVariable) {
-                        token.$extensions['com.figma.aliasData'] = {
-                            targetVariableId: aliasVariable.id,
-                            targetVariableName: aliasVariable.name,
-                            targetVariableSetId: collection.id,
-                            targetVariableSetName: collection.name
-                        };
-                    }
+            // Procesar cada modo
+            for (const mode of collection.modes) {
+                const modeName = mode.name;
+                console.log(`   🎨 Procesando modo: ${modeName}`);
+
+                if (!tokens[modeName]) {
+                    tokens[modeName] = {};
                 }
 
-                setNestedProperty(tokens[modeName], tokenPath, token);
+                // Procesar cada variable
+                for (const variable of variables) {
+                    try {
+                        const value = variable.valuesByMode[mode.modeId];
+
+                        // Si no hay valor para este modo, continuar
+                        if (value === undefined) {
+                            console.log(`      ⚠️ Sin valor para ${variable.name} en modo ${modeName}`);
+                            continue;
+                        }
+
+                        const tokenPath = variable.name.replace(/\//g, '.');
+                        console.log(`      ✓ Procesando: ${tokenPath}`);
+
+                        // Crear estructura de token
+                        const token = {
+                            $type: getTokenType(variable.resolvedType),
+                            $value: await resolveValue(value, variable.resolvedType, mode.modeId),
+                            $extensions: {
+                                'com.figma.variableId': variable.id,
+                                'com.figma.scopes': variable.scopes || [],
+                                'com.figma.codeSyntax': variable.codeSyntax || {}
+                            }
+                        };
+
+                        // Añadir información de alias si existe
+                        if (typeof value === 'object' && value.type === 'VARIABLE_ALIAS') {
+                            const aliasVariable = await figma.variables.getVariableByIdAsync(value.id);
+                            if (aliasVariable) {
+                                token.$extensions['com.figma.aliasData'] = {
+                                    targetVariableId: aliasVariable.id,
+                                    targetVariableName: aliasVariable.name,
+                                    targetVariableSetId: collection.id,
+                                    targetVariableSetName: collection.name
+                                };
+                            }
+                        }
+
+                        setNestedProperty(tokens[modeName], tokenPath, token);
+                        totalVariables++;
+
+                    } catch (varError) {
+                        console.error(`      ❌ Error procesando ${variable.name}:`, varError);
+                    }
+                }
             }
         }
-    }
 
-    return tokens;
+        console.log(`✅ Extracción completada: ${totalVariables} variables procesadas`);
+        console.log('📦 Tokens extraídos:', tokens);
+
+        if (totalVariables === 0) {
+            throw new Error('No se pudieron extraer variables. Verifica que tengas variables con valores asignados.');
+        }
+
+        return tokens;
+
+    } catch (error) {
+        console.error('❌ Error en extractLocalVariables:', error);
+        throw error;
+    }
 }
 
 // Función para determinar el tipo de token
@@ -70,24 +119,55 @@ function getTokenType(resolvedType) {
 }
 
 // Función para resolver valores
-async function resolveValue(value, type) {
-    if (typeof value === 'object' && value.type === 'VARIABLE_ALIAS') {
+async function resolveValue(value, type, modeId) {
+    console.log(`         Resolviendo valor tipo: ${type}`, value);
+
+    // Manejar alias de variables
+    if (typeof value === 'object' && value !== null && value.type === 'VARIABLE_ALIAS') {
+        console.log(`         Es un alias, resolviendo...`);
         const aliasVariable = await figma.variables.getVariableByIdAsync(value.id);
         if (aliasVariable) {
-            const aliasMode = Object.keys(aliasVariable.valuesByMode)[0];
-            return await resolveValue(aliasVariable.valuesByMode[aliasMode], aliasVariable.resolvedType);
+            // Obtener el valor del alias en el mismo modo
+            const aliasValue = aliasVariable.valuesByMode[modeId] ||
+                aliasVariable.valuesByMode[Object.keys(aliasVariable.valuesByMode)[0]];
+            return await resolveValue(aliasValue, aliasVariable.resolvedType, modeId);
         }
     }
 
-    if (type === 'COLOR' && typeof value === 'object') {
-        return {
-            colorSpace: 'srgb',
-            components: [value.r, value.g, value.b],
-            alpha: value.a,
-            hex: rgbToHex(value)
-        };
+    // Manejar colores
+    if (type === 'COLOR') {
+        if (typeof value === 'object' && value !== null && 'r' in value) {
+            const result = {
+                colorSpace: 'srgb',
+                components: [value.r, value.g, value.b],
+                alpha: value.a !== undefined ? value.a : 1,
+                hex: rgbToHex(value)
+            };
+            console.log(`         Color resuelto:`, result.hex);
+            return result;
+        }
     }
 
+    // Manejar números
+    if (type === 'FLOAT') {
+        console.log(`         Número resuelto:`, value);
+        return value;
+    }
+
+    // Manejar strings
+    if (type === 'STRING') {
+        console.log(`         String resuelto:`, value);
+        return value;
+    }
+
+    // Manejar booleanos
+    if (type === 'BOOLEAN') {
+        console.log(`         Boolean resuelto:`, value);
+        return value;
+    }
+
+    // Valor por defecto
+    console.log(`         Valor directo:`, value);
     return value;
 }
 
