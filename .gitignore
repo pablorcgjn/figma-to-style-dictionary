@@ -19,7 +19,7 @@ npm-debug.log*
 
 # Node
 node_modules/
-package-lock.json
+# package-lock.json  # Needed for GitHub Actions cache
 
 # User uploads (optional - uncomment if you don't want to track user files)
 # uploads/
