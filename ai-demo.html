@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Generation with Structured Metadata - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #1a202c;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: #4a5568;
+            line-height: 1.7;
+        }
+
+        .metadata-info {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .metadata-info h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        .metadata-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .metadata-info li {
+            padding: 6px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .metadata-info li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .scenario {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .scenario:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .scenario-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .scenario-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .scenario-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-label {
+            display: inline-block;
+            background: #edf2f7;
+            color: #2d3748;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .user-request {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-style: italic;
+            color: #1e40af;
+        }
+
+        .ai-reasoning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.7;
+            color: #78350f;
+            white-space: pre-wrap;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 24px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.7;
+            position: relative;
+        }
+
+        .code-block:before {
+            content: "Generated Code";
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: #334155;
+            color: #94a3b8;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .highlight {
+            background: rgba(251, 191, 36, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .anti-pattern-warning {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left: 4px solid #ef4444;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+
+        .anti-pattern-warning h4 {
+            color: #991b1b;
+            margin-bottom: 12px;
+            font-size: 1.125rem;
+        }
+
+        .anti-pattern-warning p {
+            color: #7f1d1d;
+            line-height: 1.6;
+        }
+
+        .success-badge {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .capabilities {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .capabilities h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #2d3748;
+        }
+
+        .capability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .capability-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .capability-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .capability-card h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 1.125rem;
+        }
+
+        .capability-card p {
+            color: #4a5568;
+            line-height: 1.6;
+            font-size: 0.9375rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .scenario {
+                padding: 20px;
+            }
+
+            .capability-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Code Generation with Structured Metadata</h1>
+            <p>
+                This demonstration shows how an LLM (Large Language Model) can generate production-ready UI code
+                using <strong>only structured metadata</strong> from a design system. Based on the methodology from
+                <em>"Design system documentation as structured metadata"</em> by Cristian Morales Achiardi.
+            </p>
+
+            <div class="metadata-info">
+                <h3>📋 What the AI Has Access To:</h3>
+                <ul>
+                    <li><strong>aiHints</strong> - Selection criteria and contextual rules</li>
+                    <li><strong>variants</strong> - Purpose and usage of each variant</li>
+                    <li><strong>antiPatterns</strong> - Common mistakes to avoid with solutions</li>
+                    <li><strong>composition</strong> - How components can be combined</li>
+                    <li><strong>accessibility</strong> - WCAG requirements and ARIA attributes</li>
+                    <li><strong>examples</strong> - Real-world usage patterns</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Scenario 1 -->
+        <div class="scenario">
+            <div class="scenario-header">
+                <div class="scenario-number">1</div>
+                <div class="scenario-title">User Registration Form</div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">👤 User Request</div>
+                <div class="user-request">
+                    "Create a registration form with a submit button and a cancel button.
+                    The submit button should be the primary action."
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">🧠 AI Reasoning Process</div>
+                <div class="ai-reasoning">Analyzing request using Button.metadata.ts:
+
+                    1. Checking aiHints.selectionCriteria:
+                    - "Use 'primary' variant ONLY for the single most important action"
+                    - Submit is the main action → variant="primary" ✓
+                    - Cancel is secondary → variant="neutral" ✓
+
+                    2. Checking composition.commonPatterns:
+                    - Pattern: "Form actions"
+                    - Example: "Submit (primary) + Cancel (neutral)"
+                    - Spacing: 8px gap between buttons
+
+                    3. Checking accessibility requirements:
+                    - type="submit" for form submission
+                    - Clear, action-oriented labels</div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">💻 Generated Code</div>
+                <div class="code-block">
+                    <pre>&lt;div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}&gt;
+  &lt;Button 
+    variant="neutral" 
+    size="medium" 
+    label="Cancel" 
+    onClick={onCancel}
+    type="button"
+  /&gt;
+  
+  &lt;Button 
+    variant="primary" 
+    size="medium" 
+    label="Create Account" 
+    type="submit"
+  /&gt;
+&lt;/div&gt;</pre>
+                </div>
+                <div class="success-badge">✓ Follows all design system rules</div>
+            </div>
+        </div>
+
+        <!-- Scenario 2 -->
+        <div class="scenario">
+            <div class="scenario-header">
+                <div class="scenario-number">2</div>
+                <div class="scenario-title">Delete Confirmation Modal</div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">👤 User Request</div>
+                <div class="user-request">
+                    "Create a modal that asks the user to confirm deletion of an item.
+                    It should have a confirm and cancel button."
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">🧠 AI Reasoning Process</div>
+                <div class="ai-reasoning">Analyzing request using Button.metadata.ts:
+
+                    ⚠️ ANTI-PATTERN DETECTED!
+
+                    1. Checking usage.antiPatterns:
+                    - Found: "Using primary variant for destructive actions"
+                    - Problem: "Brand color implies positive action, but deletion is destructive"
+                    - Solution: "Use neutral with clear labeling"
+
+                    2. Adjusted decision:
+                    - Cancel → variant="subtle" (minimal visual weight)
+                    - Delete → variant="neutral" (clear but not positive)
+                    - Label: "Delete Item" (explicit action)</div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">💻 Generated Code</div>
+                <div class="code-block">
+                    <pre>&lt;div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}&gt;
+  &lt;Button 
+    variant="subtle" 
+    size="medium" 
+    label="Cancel" 
+    onClick={onCancel}
+  /&gt;
+  
+  &lt;!-- Neutral variant for destructive action per antiPattern guidance --&gt;
+  &lt;Button 
+    variant="neutral" 
+    size="medium" 
+    label="Delete Item" 
+    onClick={onConfirm}
+  /&gt;
+&lt;/div&gt;</pre>
+                </div>
+                <div class="anti-pattern-warning">
+                    <h4>⚠️ Anti-Pattern Avoided</h4>
+                    <p>
+                        The AI detected that using a primary button for a destructive action would violate
+                        design system rules. It automatically corrected this by using a neutral variant with
+                        clear labeling instead.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scenario 3 -->
+        <div class="scenario">
+            <div class="scenario-header">
+                <div class="scenario-number">3</div>
+                <div class="scenario-title">Data Table Row Actions</div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">👤 User Request</div>
+                <div class="user-request">
+                    "I have a data table and need to add edit and delete buttons to each row.
+                    The table is compact, so buttons should be small."
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">🧠 AI Reasoning Process</div>
+                <div class="ai-reasoning">Analyzing request using Button.metadata.ts:
+
+                    1. Checking aiHints.selectionCriteria:
+                    - "Use 'small' size in compact UIs, data tables" ✓
+                    - This is a data table → size="small"
+
+                    2. Checking variants.type.subtle.whenToUse:
+                    - "Repeated actions in lists or tables" ✓
+                    - variant="subtle" for minimal visual weight
+
+                    3. Checking props.iconStart guidelines:
+                    - "Use to reinforce the action meaning"
+                    - Icons help in compact spaces</div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">💻 Generated Code</div>
+                <div class="code-block">
+                    <pre>&lt;div style={{ display: 'flex', gap: '4px' }}&gt;
+  &lt;Button 
+    variant="subtle" 
+    size="small" 
+    label="Edit" 
+    iconStart={&lt;EditIcon /&gt;}
+    onClick={() =&gt; onEdit(row.id)}
+    aria-label={`Edit ${row.name}`}
+  /&gt;
+  
+  &lt;Button 
+    variant="subtle" 
+    size="small" 
+    label="Delete" 
+    iconStart={&lt;DeleteIcon /&gt;}
+    onClick={() =&gt; onDelete(row.id)}
+    aria-label={`Delete ${row.name}`}
+  /&gt;
+&lt;/div&gt;</pre>
+                </div>
+                <div class="success-badge">✓ Context-aware size and variant selection</div>
+            </div>
+        </div>
+
+        <!-- Scenario 4 -->
+        <div class="scenario">
+            <div class="scenario-header">
+                <div class="scenario-number">4</div>
+                <div class="scenario-title">Multi-Step Form Navigation</div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">👤 User Request</div>
+                <div class="user-request">
+                    "I have a 3-step form. I need: A 'Back' button to go to the previous step,
+                    a 'Save Draft' button to save progress, and a 'Continue' button to go to the next step."
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">🧠 AI Reasoning Process</div>
+                <div class="ai-reasoning">Analyzing request using Button.metadata.ts:
+
+                    1. Identifying action hierarchy:
+                    - "Continue" is primary forward action → variant="primary"
+                    - "Save Draft" is secondary → variant="neutral"
+                    - "Back" is tertiary → variant="subtle"
+
+                    2. Checking aiHints.contextualRules:
+                    - "Maximum 1 primary button per logical section" ✓
+                    - Clear visual hierarchy established</div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">💻 Generated Code</div>
+                <div class="code-block">
+                    <pre>&lt;div style={{ display: 'flex', justifyContent: 'space-between' }}&gt;
+  &lt;!-- Left: Tertiary action --&gt;
+  &lt;Button 
+    variant="subtle" 
+    label="Back" 
+    iconStart={&lt;ArrowLeftIcon /&gt;}
+    onClick={onBack}
+  /&gt;
+  
+  &lt;!-- Right: Secondary + Primary --&gt;
+  &lt;div style={{ display: 'flex', gap: '8px' }}&gt;
+    &lt;Button 
+      variant="neutral" 
+      label="Save Draft" 
+      onClick={onSaveDraft}
+    /&gt;
+    
+    &lt;Button 
+      variant="primary" 
+      label="Continue" 
+      iconEnd={&lt;ArrowRightIcon /&gt;}
+      onClick={onContinue}
+    /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+                </div>
+                <div class="success-badge">✓ Perfect hierarchy with 3 action levels</div>
+            </div>
+        </div>
+
+        <!-- Scenario 5 -->
+        <div class="scenario">
+            <div class="scenario-header">
+                <div class="scenario-number">5</div>
+                <div class="scenario-title">Anti-Pattern Detection & Correction</div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">👤 User Request</div>
+                <div class="user-request">
+                    "Create a toolbar with these buttons: New Document, Save, Export, Print.
+                    <strong>All actions are important, so make them all primary buttons.</strong>"
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">🧠 AI Reasoning Process</div>
+                <div class="ai-reasoning">⚠️ ANTI-PATTERN DETECTED!
+
+                    User requested: "All actions are important, so make them all primary"
+
+                    1. Checking usage.antiPatterns:
+                    - Violation: "Multiple primary buttons in the same section"
+                    - Problem: "Creates visual hierarchy confusion"
+                    - Solution: "Use only one primary button"
+
+                    2. Corrected hierarchy:
+                    - Save → variant="primary" (most critical)
+                    - Others → variant="neutral" (important but secondary)
+
+                    3. AI will educate user about this decision</div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">💻 Generated Code</div>
+                <div class="code-block">
+                    <pre>&lt;div style={{ display: 'flex', gap: '8px' }}&gt;
+  &lt;Button variant="neutral" label="New" iconStart={&lt;NewDocIcon /&gt;} /&gt;
+  
+  &lt;!-- Primary reserved for MOST important action --&gt;
+  &lt;Button variant="primary" label="Save" iconStart={&lt;SaveIcon /&gt;} /&gt;
+  
+  &lt;Button variant="neutral" label="Export" iconStart={&lt;ExportIcon /&gt;} /&gt;
+  &lt;Button variant="neutral" label="Print" iconStart={&lt;PrintIcon /&gt;} /&gt;
+&lt;/div&gt;</pre>
+                </div>
+                <div class="anti-pattern-warning">
+                    <h4>🎓 AI Explanation to User</h4>
+                    <p>
+                        <strong>I noticed you requested all buttons to be primary, but the design system
+                            metadata specifically warns against this pattern.</strong>
+                    </p>
+                    <p style="margin-top: 12px;">
+                        Anti-pattern: "Multiple primary buttons in the same section"<br>
+                        Problem: "Creates visual hierarchy confusion - user doesn't know which action is most important"
+                    </p>
+                    <p style="margin-top: 12px;">
+                        I've adjusted the code to follow best practices by making only "Save" primary
+                        (the most critical action to preserve work) while keeping other buttons neutral.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capabilities Summary -->
+        <div class="capabilities">
+            <h2>🎯 Demonstrated AI Capabilities</h2>
+            <p style="color: #4a5568; margin-bottom: 24px; line-height: 1.7;">
+                With structured metadata, the AI transforms from a simple code generator into a
+                <strong>design system expert</strong> that validates, educates, and enforces best practices.
+            </p>
+
+            <div class="capability-grid">
+                <div class="capability-card">
+                    <h3>✅ Variant Selection</h3>
+                    <p>
+                        Analyzes user intent and consults aiHints.selectionCriteria to choose the
+                        appropriate variant (primary/neutral/subtle) with clear reasoning.
+                    </p>
+                </div>
+
+                <div class="capability-card">
+                    <h3>🔍 Anti-Pattern Detection</h3>
+                    <p>
+                        Identifies violations before generating code, explains why patterns are problematic,
+                        and suggests corrections based on metadata.
+                    </p>
+                </div>
+
+                <div class="capability-card">
+                    <h3>♿ Accessibility Compliance</h3>
+                    <p>
+                        Automatically includes proper ARIA attributes, correct button types, descriptive
+                        labels, and follows keyboard navigation rules.
+                    </p>
+                </div>
+
+                <div class="capability-card">
+                    <h3>🎨 Composition Patterns</h3>
+                    <p>
+                        Follows common patterns (form actions, modals, toolbars), uses correct spacing
+                        from metadata, and maintains visual hierarchy.
+                    </p>
+                </div>
+
+                <div class="capability-card">
+                    <h3>📏 Context-Aware Decisions</h3>
+                    <p>
+                        Adapts to different scenarios (forms, tables, toolbars), considers user flow
+                        and intent, and balances requests with design system rules.
+                    </p>
+                </div>
+
+                <div class="capability-card">
+                    <h3>🎓 User Education</h3>
+                    <p>
+                        Provides explanations for decisions, teaches best practices, and helps users
+                        understand the "why" behind design system rules.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>Methodology based on:</strong><br>
+                <a href="https://www.designsystemscollective.com/design-system-documentation-as-structured-metadata-315f62c6eab1"
+                    target="_blank">
+                    "Design system documentation as structured metadata"
+                </a><br>
+                by Cristian Morales Achiardi
+            </p>
+            <p style="margin-top: 16px; opacity: 0.9;">
+                Created with ❤️ using structured metadata approach
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>
